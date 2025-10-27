@@ -1,0 +1,6 @@
+project_id     = "dev-project-id"
+location       = "us"
+environment    = "dev"
+data_store_id  = "dev-document-store"
+display_name   = "Development"
+gcs_uri        = "gs://dev-bucket/documents/*"

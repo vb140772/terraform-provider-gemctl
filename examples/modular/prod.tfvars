@@ -1,0 +1,6 @@
+project_id     = "prod-project-id"
+location       = "us"
+environment    = "prod"
+data_store_id  = "prod-document-store"
+display_name   = "Production"
+gcs_uri        = "gs://prod-bucket/documents/*"
