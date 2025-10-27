@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Unshallow
+        run: git fetch --prune --unshallow
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build provider
+        run: |
+          go build -o terraform-provider-gemctl
+
+      - name: Generate docs
+        run: |
+          go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+          go generate ./...
+
+      - name: Format Terraform files
+        run: terraform fmt -recursive ./examples/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: terraform-provider-gemctl
+          generate_release_notes: true
+          body: |
+            ## Installation
+
+            Download the appropriate binary for your platform from the assets below.
+
+            ### Manual Installation
+
+            1. Download the provider binary for your platform
+            2. Place it in your Terraform plugin directory:
+               - Linux: `~/.terraform.d/plugins/registry.terraform.io/vb140772/gemctl`
+               - macOS: `~/Library/Application Support/io.terraform/plugins/registry.terraform.io/vb140772/gemctl`
+               - Windows: `%APPDATA%\terraform.d\plugins\registry.terraform.io\vb140772\gemctl`
+
+            ### Usage
+
+            Add the provider to your Terraform configuration:
+
+            ```hcl
+            terraform {
+              required_providers {
+                gemctl = {
+                  source  = "vb140772/gemctl"
+                  version = "~> 0.1"
+                }
+              }
+            }
+            ```
+
+            See [README.md](README.md) for more information.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

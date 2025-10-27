@@ -272,6 +272,56 @@ provider_installation {
 go build -o terraform-provider-gemctl
 ```
 
+## Publishing to Terraform Registry
+
+To publish this provider to the [Terraform Registry](https://registry.terraform.io), follow these steps:
+
+### Prerequisites
+
+1. Sign in to the [Terraform Registry](https://registry.terraform.io/sign-in)
+2. Create a namespace `vb140772` or use an existing one
+3. Ensure your GitHub repository is public
+
+### Creating a Release
+
+1. **Create a git tag:**
+   ```bash
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```
+
+2. **GitHub Actions will automatically:**
+   - Build the provider
+   - Generate documentation
+   - Create a GitHub release
+   - Publish to Terraform Registry (after linking)
+
+3. **Link the repository to the registry:**
+   - Go to [Terraform Registry](https://registry.terraform.io)
+   - Sign in and navigate to your namespace
+   - Click "Link a Provider" and select your repository
+   - The registry will automatically import the provider from the GitHub release
+
+### Workflows
+
+The repository includes GitHub Actions workflows:
+
+- **CI** (`.github/workflows/ci.yml`): Runs tests and checks on every push
+- **Build** (`.github/workflows/build.yml`): Builds provider binaries for multiple platforms
+- **Release** (`.github/workflows/release.yml`): Creates GitHub releases when tags are pushed
+
+### Manual Release
+
+If you prefer to create releases manually:
+
+```bash
+# Build the provider
+go build -o terraform-provider-gemctl
+
+# Create a GitHub release
+# Then upload the binary as a release asset
+```
+
 ## License
 
 MIT License - Copyright (c) 2024

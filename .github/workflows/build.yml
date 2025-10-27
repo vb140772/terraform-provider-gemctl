@@ -1,0 +1,69 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: darwin
+            goarch: amd64
+            binname: terraform-provider-gemctl_darwin_amd64
+          - goos: darwin
+            goarch: arm64
+            binname: terraform-provider-gemctl_darwin_arm64
+          - goos: freebsd
+            goarch: amd64
+            binname: terraform-provider-gemctl_freebsd_amd64
+          - goos: freebsd
+            goarch: arm64
+            binname: terraform-provider-gemctl_freebsd_arm64
+          - goos: linux
+            goarch: amd64
+            binname: terraform-provider-gemctl_linux_amd64
+          - goos: linux
+            goarch: arm64
+            binname: terraform-provider-gemctl_linux_arm64
+          - goos: windows
+            goarch: amd64
+            binname: terraform-provider-gemctl_windows_amd64
+            ext: .exe
+          - goos: windows
+            goarch: arm64
+            binname: terraform-provider-gemctl_windows_arm64
+            ext: .exe
+
+    runs-on: ${{ matrix.runs-on || 'ubuntu-latest' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Get version from tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Build
+        run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o ${{ matrix.binname }}${{ matrix.ext || '' }} .
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.binname }}
+          path: ${{ matrix.binname }}${{ matrix.ext || '' }}
