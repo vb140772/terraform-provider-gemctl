@@ -307,20 +307,29 @@ To publish this provider to the [Terraform Registry](https://registry.terraform.
 The repository includes GitHub Actions workflows:
 
 - **CI** (`.github/workflows/ci.yml`): Runs tests and checks on every push
-- **Build** (`.github/workflows/build.yml`): Builds provider binaries for multiple platforms
-- **Release** (`.github/workflows/release.yml`): Creates GitHub releases when tags are pushed
+- **Release** (`.github/workflows/release.yml`): Uses [GoReleaser](https://goreleaser.com/) to build and publish releases
 
-### Manual Release
+The release workflow uses [GoReleaser](https://goreleaser.com/) for automated builds and releases, following the [Terraform Registry publishing guidelines](https://developer.hashicorp.com/terraform/registry/providers/publishing#using-goreleaser-locally).
 
-If you prefer to create releases manually:
+### Local Release (Development)
+
+To test releases locally with GoReleaser:
 
 ```bash
-# Build the provider
-go build -o terraform-provider-gemctl
+# Install GoReleaser
+brew install goreleaser/tap/goreleaser
 
-# Create a GitHub release
-# Then upload the binary as a release asset
+# Test the configuration
+goreleaser check
+
+# Build a snapshot release (no git tag required)
+goreleaser release --snapshot
+
+# Or build a full release
+goreleaser release
 ```
+
+This is useful for testing the release process before pushing tags to GitHub.
 
 ## License
 

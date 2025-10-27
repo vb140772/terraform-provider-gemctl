@@ -1,0 +1,78 @@
+# GoReleaser configuration for terraform-provider-gemctl
+# Documentation: https://goreleaser.com
+# Terraform Registry publishing: https://developer.hashicorp.com/terraform/registry/providers/publishing#using-goreleaser-locally
+
+version: 2
+
+# Project metadata
+project_name: terraform-provider-gemctl
+before:
+  hooks:
+    - go mod tidy
+    - go vet ./...
+    - go test ./...
+    - go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+    - go generate ./...
+    - terraform fmt -recursive ./examples/
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+    main: .
+    binary: terraform-provider-gemctl{{ if eq .Os "windows" }}.exe{{ end }}
+
+archives:
+  - name_template: "terraform-provider-gemctl_{{.Version}}_{{.Os}}_{{.Arch}}"
+    replace: true
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  algorithm: sha256
+  name_template: 'terraform-provider-gemctl_{{.Version}}_SHA256SUMS'
+
+release:
+  github:
+    owner: vb140772
+    name: terraform-provider-gemctl
+  draft: false
+  prerelease: auto
+  mode: replace
+  footer: |
+    ## Installation
+
+    Download the appropriate provider binary for your platform and place it in your Terraform plugin directory:
+
+    - **Linux**: `~/.terraform.d/plugins/registry.terraform.io/vb140772/gemctl/0.1.0/linux_amd64/`
+    - **macOS**: `~/Library/Application Support/io.terraform.d/plugins/registry.terraform.io/vb140772/gemctl/0.1.0/darwin_amd64/`
+    - **Windows**: `%APPDATA%\terraform.d\plugins\registry.terraform.io\vb140772\gemctl\0.1.0\windows_amd64\`
+
+    Alternatively, if published to the Terraform Registry:
+
+    ```hcl
+    terraform {
+      required_providers {
+        gemctl = {
+          source  = "vb140772/gemctl"
+          version = "{{.Version}}"
+        }
+      }
+    }
+    ```
+
+    See [README.md](README.md) for more information.
+
+    ---
+    Released by [GoReleaser](https://github.com/goreleaser/goreleaser) {{ .Date }}.
+
+announce:
+  skip: true

@@ -56,3 +56,10 @@ jobs:
       - name: Check docs are up to date
         run: |
           git diff --exit-code docs/
+
+      - name: Check GoReleaser config
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: v2.12.7
+          args: check
